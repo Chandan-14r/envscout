@@ -1,0 +1,27 @@
+{
+  "name": "envscout",
+  "version": "0.1.0",
+  "description": "Audit environment variable usage and .env.example coverage.",
+  "type": "module",
+  "bin": {
+    "envscout": "src/cli.js"
+  },
+  "scripts": {
+    "test": "node --test",
+    "demo": "node src/cli.js demo --format table",
+    "demo:fix": "node src/cli.js demo --autofix --format markdown"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "keywords": [
+    "env",
+    "dotenv",
+    "cli",
+    "developer-tooling",
+    "audit",
+    "configuration"
+  ],
+  "license": "MIT"
+}
+

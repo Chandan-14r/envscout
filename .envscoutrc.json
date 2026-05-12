@@ -1,0 +1,5 @@
+{
+  "envExample": ".env.example",
+  "ignore": ["node_modules/", "dist/", "build/"]
+}
+

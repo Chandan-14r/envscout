@@ -1,0 +1,51 @@
+<svg width="1200" height="630" viewBox="0 0 1200 630" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="EnvScout preview">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1200" y2="630" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#0B1220"/>
+      <stop offset="1" stop-color="#0A2A2A"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#22C55E"/>
+      <stop offset="1" stop-color="#14B8A6"/>
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="18" stdDeviation="24" flood-color="#000000" flood-opacity="0.35"/>
+    </filter>
+  </defs>
+
+  <rect width="1200" height="630" fill="url(#bg)"/>
+
+  <g opacity="0.2">
+    <circle cx="1040" cy="120" r="220" fill="url(#accent)"/>
+    <circle cx="220" cy="560" r="260" fill="url(#accent)"/>
+  </g>
+
+  <g filter="url(#shadow)">
+    <rect x="110" y="160" width="980" height="360" rx="18" fill="#0F172A" stroke="#1F2937"/>
+    <rect x="110" y="160" width="980" height="44" rx="18" fill="#111827"/>
+    <rect x="110" y="186" width="980" height="18" fill="#111827"/>
+    <circle cx="142" cy="182" r="6" fill="#EF4444"/>
+    <circle cx="162" cy="182" r="6" fill="#F59E0B"/>
+    <circle cx="182" cy="182" r="6" fill="#22C55E"/>
+
+    <g font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace" font-size="18" fill="#E5E7EB">
+      <text x="150" y="246" fill="#A7F3D0">$ envscout demo --env-example demo/.env.example</text>
+      <text x="150" y="280">Files: discovered 4, scanned 4</text>
+      <text x="150" y="310">Found 7 env key(s) from 7 match(es).</text>
+      <text x="150" y="340" fill="#93C5FD">.env.example: demo/.env.example (2 key(s); missing: 5, unused: 0)</text>
+
+      <text x="150" y="388" fill="#FDE68A">Missing from .env.example</text>
+      <text x="170" y="420" fill="#E5E7EB">- API_KEY</text>
+      <text x="170" y="448" fill="#E5E7EB">- DEPLOY_ENV</text>
+      <text x="170" y="476" fill="#E5E7EB">- SERVICE_TOKEN</text>
+      <text x="170" y="504" fill="#E5E7EB">- SENTRY_DSN</text>
+      <text x="170" y="532" fill="#E5E7EB">- UPLOAD_BUCKET</text>
+    </g>
+  </g>
+
+  <g>
+    <text x="110" y="104" font-family="ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial" font-size="56" font-weight="800" fill="#ECFEFF">EnvScout</text>
+    <text x="110" y="136" font-family="ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial" font-size="20" fill="#A7F3D0">Audit env usage. Keep .env.example honest.</text>
+  </g>
+</svg>
+

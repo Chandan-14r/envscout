@@ -9,7 +9,8 @@
   "scripts": {
     "test": "node --test",
     "demo": "node src/cli.js demo --format table",
-    "demo:fix": "node src/cli.js demo --autofix --format markdown"
+    "demo:fix": "node src/cli.js demo --autofix --format markdown",
+    "demo:html": "node src/cli.js demo --format html --output demo/envscout-demo-report.html"
   },
   "engines": {
     "node": ">=20"
@@ -24,4 +25,3 @@
   ],
   "license": "MIT"
 }
-

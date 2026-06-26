@@ -4,7 +4,7 @@ import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 
-import { renderHtml } from "../src/output.js";
+import { renderHtml, renderSarif } from "../src/output.js";
 import { scanRepo } from "../src/scan.js";
 
 test("renderHtml includes summary metrics and escapes key content", () => {
@@ -69,4 +69,29 @@ test("scanRepo report renders missing and unused sections into html", async () =
   } finally {
     await fs.rm(tempRoot, { recursive: true, force: true });
   }
+});
+
+test("renderSarif creates code-scanning results with source locations", () => {
+  const sarif = JSON.parse(
+    renderSarif({
+      rootDir: "/tmp/demo",
+      envExamplePath: "/tmp/demo/.env.example",
+      envExampleFound: true,
+      stats: { filesDiscovered: 1, filesScanned: 1, findings: 1, keys: 1, envExampleKeys: 1 },
+      keys: ["API_TOKEN"],
+      envExampleKeys: ["LEGACY_TOKEN"],
+      missingInEnvExample: ["API_TOKEN"],
+      unusedInRepo: ["LEGACY_TOKEN"],
+      findings: [{ key: "API_TOKEN", path: "src/app.js", line: 12, pattern: "js_process_env_dot" }],
+      skipped: []
+    })
+  );
+
+  assert.equal(sarif.version, "2.1.0");
+  assert.equal(sarif.runs[0].tool.driver.name, "EnvScout");
+  assert.deepEqual(sarif.runs[0].results[0].locations[0].physicalLocation, {
+    artifactLocation: { uri: "src/app.js" },
+    region: { startLine: 12 }
+  });
+  assert.equal(sarif.runs[0].results[1].ruleId, "envscout/unused-env-example");
 });

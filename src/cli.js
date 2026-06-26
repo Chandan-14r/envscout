@@ -4,20 +4,21 @@ import path from "node:path";
 
 import { autofixEnvExample } from "./envExample.js";
 import { scanRepo } from "./scan.js";
-import { renderHtml, renderMarkdown, renderTable } from "./output.js";
+import { renderHtml, renderMarkdown, renderSarif, renderTable } from "./output.js";
 import { tryParseJson } from "./util.js";
 
 function usage() {
   return `EnvScout — env usage + .env.example coverage
 
 Usage:
-  envscout <path> [--format table|markdown|json|html] [--output <file>]
+  envscout <path> [--format table|markdown|json|html|sarif] [--output <file>]
           [--env-example <file>] [--autofix] [--ignore <subpath> ...]
 
 Examples:
   envscout .
   envscout . --env-example .env.example
   envscout demo --format markdown
+  envscout . --format sarif --output envscout.sarif
   envscout demo --autofix
 
 Config (optional):
@@ -116,6 +117,7 @@ async function main() {
   let outputText;
   if (format === "json") outputText = JSON.stringify(report, null, 2);
   else if (format === "html") outputText = renderHtml(report);
+  else if (format === "sarif") outputText = renderSarif(report);
   else if (format === "markdown" || format === "md") outputText = renderMarkdown(report);
   else if (format === "table" || format === "text") outputText = renderTable(report);
   else {

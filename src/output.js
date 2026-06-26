@@ -134,6 +134,88 @@ export function renderMarkdown(report) {
   return lines.join("\n");
 }
 
+/**
+ * Render findings in the SARIF 2.1.0 interchange format. This makes EnvScout
+ * useful in GitHub Code Scanning and any CI system that understands SARIF.
+ */
+export function renderSarif(report) {
+  const findingsByKey = new Map();
+  for (const finding of report.findings) {
+    if (!findingsByKey.has(finding.key)) findingsByKey.set(finding.key, finding);
+  }
+
+  const results = [
+    ...report.missingInEnvExample.map((key) => {
+      const finding = findingsByKey.get(key);
+      const result = {
+        ruleId: "envscout/missing-env-example",
+        level: "error",
+        message: {
+          text: `${key} is referenced in code but missing from .env.example.`
+        },
+        properties: { key }
+      };
+      if (finding) {
+        result.locations = [
+          {
+            physicalLocation: {
+              artifactLocation: { uri: finding.path },
+              region: { startLine: finding.line }
+            }
+          }
+        ];
+      }
+      return result;
+    }),
+    ...report.unusedInRepo.map((key) => ({
+      ruleId: "envscout/unused-env-example",
+      level: "warning",
+      message: {
+        text: `${key} is documented in .env.example but is not referenced in scanned files.`
+      },
+      properties: { key }
+    }))
+  ];
+
+  return JSON.stringify(
+    {
+      $schema: "https://json.schemastore.org/sarif-2.1.0.json",
+      version: "2.1.0",
+      runs: [
+        {
+          tool: {
+            driver: {
+              name: "EnvScout",
+              informationUri: "https://github.com/Chandan-14r/envscout",
+              rules: [
+                {
+                  id: "envscout/missing-env-example",
+                  shortDescription: { text: "Environment key missing from .env.example" },
+                  fullDescription: {
+                    text: "Every environment key referenced in code should be documented in .env.example."
+                  },
+                  defaultConfiguration: { level: "error" }
+                },
+                {
+                  id: "envscout/unused-env-example",
+                  shortDescription: { text: "Unused environment key in .env.example" },
+                  fullDescription: {
+                    text: "Environment keys that are no longer referenced should be reviewed or removed."
+                  },
+                  defaultConfiguration: { level: "warning" }
+                }
+              ]
+            }
+          },
+          results
+        }
+      ]
+    },
+    null,
+    2
+  );
+}
+
 export function renderHtml(report) {
   const coverage = report.stats.keys === 0 ? 100 : (report.envExampleKeys.length / report.stats.keys) * 100;
   const findingsRows = report.findings

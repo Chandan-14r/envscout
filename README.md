@@ -17,6 +17,7 @@ It’s intentionally dependency-free and fast: a small, credible CLI you can ski
 - reports **unused keys** (present in `.env.example` but not referenced)
 - optional `--autofix` appends missing keys to `.env.example` safely
 - can export a polished standalone **HTML report** for PRs, docs, or audits
+- exports **SARIF** for GitHub Code Scanning and CI quality gates
 - ships with a small demo project + tests + CI
 
 ## Quick Start
@@ -46,6 +47,14 @@ Generate a shareable HTML audit:
 ```bash
 node src/cli.js . --env-example .env.example --format html --output envscout-report.html
 ```
+
+Export findings for GitHub Code Scanning or another SARIF-aware platform:
+
+```bash
+node src/cli.js . --env-example .env.example --format sarif --output envscout.sarif
+```
+
+In GitHub Actions, upload the report with `github/codeql-action/upload-sarif` after running EnvScout. Missing keys are emitted as errors with source locations; stale example keys are emitted as warnings.
 
 Append missing keys to `.env.example`:
 
@@ -78,7 +87,7 @@ CLI flags override config.
 - `src/scan.js` - file walking + pattern matching
 - `src/patterns.js` - language patterns and scan heuristics
 - `src/envExample.js` - `.env.example` parsing and `--autofix`
-- `src/output.js` - table, Markdown, and standalone HTML renderers
+- `src/output.js` - table, Markdown, standalone HTML, and SARIF renderers
 - `demo/` - tiny mixed-language demo project
 - `test/` - Node built-in test runner suite
 - `.github/workflows/ci.yml` - lightweight CI
@@ -87,7 +96,6 @@ CLI flags override config.
 
 - glob-based ignore patterns (instead of simple subpath matching)
 - richer language support (Go, Rust, Java, Dockerfile `ARG`/`ENV` awareness)
-- GitHub annotations for missing keys in PRs
 - pre-commit hook mode for “fail fast” config drift
 
 ## License

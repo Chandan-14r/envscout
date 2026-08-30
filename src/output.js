@@ -63,6 +63,10 @@ export function renderTable(report, options) {
   };
 
   show("Missing from .env.example", report.missingInEnvExample);
+  if (report.newMissingInEnvExample) {
+    show("New missing keys (fail CI)", report.newMissingInEnvExample);
+    show("Baseline missing keys (known debt)", report.baselineMissingInEnvExample);
+  }
   show("Unused (in .env.example but not referenced)", report.unusedInRepo);
 
   if (report.findings.length > 0) {
@@ -118,6 +122,10 @@ export function renderMarkdown(report) {
   };
 
   section("Missing from `.env.example`", report.missingInEnvExample);
+  if (report.newMissingInEnvExample) {
+    section("New missing keys (fail CI)", report.newMissingInEnvExample);
+    section("Baseline missing keys (known debt)", report.baselineMissingInEnvExample);
+  }
   section("Unused keys (present in `.env.example`)", report.unusedInRepo);
 
   if (report.findings.length > 0) {
@@ -145,7 +153,7 @@ export function renderSarif(report) {
   }
 
   const results = [
-    ...report.missingInEnvExample.map((key) => {
+    ...(report.newMissingInEnvExample || report.missingInEnvExample).map((key) => {
       const finding = findingsByKey.get(key);
       const result = {
         ruleId: "envscout/missing-env-example",
@@ -229,6 +237,8 @@ export function renderHtml(report) {
         </tr>`
     )
     .join("");
+  const newMissing = report.newMissingInEnvExample || report.missingInEnvExample;
+  const baselineMissing = report.baselineMissingInEnvExample || [];
 
   return `<!doctype html>
 <html lang="en">
@@ -468,8 +478,8 @@ export function renderHtml(report) {
         </p>
         <div class="meta">
           <span>Root <code>${escapeHtml(report.rootDir)}</code></span>
-          <span class="pill ${report.missingInEnvExample.length === 0 ? "tone-ok" : "tone-danger"}">
-            Missing ${report.missingInEnvExample.length}
+          <span class="pill ${newMissing.length === 0 ? "tone-ok" : "tone-danger"}">
+            New missing ${newMissing.length}
           </span>
           <span class="pill ${report.unusedInRepo.length === 0 ? "tone-ok" : "tone-warn"}">
             Unused ${report.unusedInRepo.length}
@@ -499,14 +509,20 @@ export function renderHtml(report) {
 
       <section class="grid dual">
         <article class="panel">
-          <h2>Missing from .env.example</h2>
-          <ul>${renderListItems(report.missingInEnvExample, "Everything referenced in code is documented.")}</ul>
+          <h2>${report.newMissingInEnvExample ? "New missing keys" : "Missing from .env.example"}</h2>
+          <ul>${renderListItems(newMissing, "Everything referenced in code is documented.")}</ul>
         </article>
         <article class="panel">
           <h2>Unused keys</h2>
           <ul>${renderListItems(report.unusedInRepo, "No stale keys were found in .env.example.")}</ul>
         </article>
       </section>
+
+      ${report.newMissingInEnvExample ? `<section class="panel">
+        <h2>Baseline missing keys</h2>
+        <p class="hint">Known debt is tracked for gradual cleanup and does not fail this run.</p>
+        <ul>${renderListItems(baselineMissing, "No known missing keys remain.")}</ul>
+      </section>` : ""}
 
       <section class="panel">
         <h2>Findings</h2>

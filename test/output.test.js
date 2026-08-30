@@ -36,7 +36,7 @@ test("renderHtml includes summary metrics and escapes key content", () => {
 
   assert.match(html, /<!doctype html>/i);
   assert.match(html, /Coverage 50%/);
-  assert.match(html, /Missing 1/);
+  assert.match(html, /New missing 1/);
   assert.match(html, /URL&lt;unsafe&gt;/);
   assert.doesNotMatch(html, /URL<unsafe>/);
 });

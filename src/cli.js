@@ -2,6 +2,7 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 
+import { applyBaseline, loadBaseline, writeBaseline } from "./baseline.js";
 import { autofixEnvExample } from "./envExample.js";
 import { scanRepo } from "./scan.js";
 import { renderHtml, renderMarkdown, renderSarif, renderTable } from "./output.js";
@@ -12,13 +13,16 @@ function usage() {
 
 Usage:
   envscout <path> [--format table|markdown|json|html|sarif] [--output <file>]
-          [--env-example <file>] [--autofix] [--ignore <subpath> ...]
+          [--env-example <file>] [--baseline <file>] [--write-baseline <file>]
+          [--autofix] [--ignore <subpath> ...]
 
 Examples:
   envscout .
   envscout . --env-example .env.example
   envscout demo --format markdown
   envscout . --format sarif --output envscout.sarif
+  envscout . --write-baseline .envscout-baseline.json
+  envscout . --baseline .envscout-baseline.json
   envscout demo --autofix
 
 Config (optional):
@@ -48,6 +52,8 @@ function parseArgv(argv) {
     else if (token === "--autofix") result.autofix = true;
     else if (token === "--ignore") result.ignore.push(args.shift());
     else if (token === "--config") result.config = args.shift();
+    else if (token === "--baseline") result.baseline = args.shift();
+    else if (token === "--write-baseline") result.writeBaseline = args.shift();
     else if (token === "--selfcheck") result.selfcheck = true;
     else result.unknown = (result.unknown || []).concat(token);
   }
@@ -97,7 +103,29 @@ async function main() {
     (config?.envExample ? path.join(path.resolve(target), config.envExample) : null) ||
     path.join(path.resolve(target), ".env.example");
 
-  const report = await scanRepo(target, { envExamplePath, ignore });
+  let report = await scanRepo(target, { envExamplePath, ignore });
+
+  const baselinePath = argv.baseline || (config?.baseline ? path.join(path.resolve(target), config.baseline) : null);
+  if (baselinePath) {
+    try {
+      const baselineKeys = await loadBaseline(baselinePath);
+      report = applyBaseline({ ...report, baselinePath }, baselineKeys);
+    } catch (error) {
+      process.stderr.write(`${error.message}\n`);
+      process.exit(2);
+    }
+  }
+
+  if (argv.writeBaseline) {
+    try {
+      await writeBaseline(argv.writeBaseline, report.missingInEnvExample);
+      process.stderr.write(`Wrote baseline to ${argv.writeBaseline}\n`);
+      report = applyBaseline({ ...report, baselinePath: argv.writeBaseline }, report.missingInEnvExample);
+    } catch (error) {
+      process.stderr.write(`Failed to write baseline: ${error.message}\n`);
+      process.exit(1);
+    }
+  }
 
   if (argv.autofix) {
     if (report.missingInEnvExample.length === 0) {
@@ -131,7 +159,8 @@ async function main() {
     process.stdout.write(outputText + "\n");
   }
 
-  process.exit(report.missingInEnvExample.length > 0 ? 1 : 0);
+  const blockingMissing = report.newMissingInEnvExample || report.missingInEnvExample;
+  process.exit(blockingMissing.length > 0 ? 1 : 0);
 }
 
 main().catch((error) => {

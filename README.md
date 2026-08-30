@@ -18,6 +18,7 @@ It’s intentionally dependency-free and fast: a small, credible CLI you can ski
 - optional `--autofix` appends missing keys to `.env.example` safely
 - can export a polished standalone **HTML report** for PRs, docs, or audits
 - exports **SARIF** for GitHub Code Scanning and CI quality gates
+- supports a **baseline** so new projects can enforce only newly introduced drift
 - ships with a small demo project + tests + CI
 
 ## Quick Start
@@ -62,6 +63,20 @@ Append missing keys to `.env.example`:
 node src/cli.js . --env-example .env.example --autofix
 ```
 
+## Adopt incrementally with a baseline
+
+For an existing project with known gaps, capture today’s missing keys once and commit the generated baseline. Future runs exit non-zero only when a new undocumented key is introduced. SARIF output also contains only new missing keys, keeping code-scanning alerts actionable.
+
+```bash
+# Capture current debt once (commit this file)
+node src/cli.js . --write-baseline .envscout-baseline.json
+
+# In CI, preserve the baseline while blocking new drift
+node src/cli.js . --baseline .envscout-baseline.json --format sarif --output envscout.sarif
+```
+
+You can also set `"baseline": ".envscout-baseline.json"` in `.envscoutrc.json`.
+
 ## Config (Optional)
 
 If a `.envscoutrc.json` exists in the target root, EnvScout loads it automatically:
@@ -69,6 +84,7 @@ If a `.envscoutrc.json` exists in the target root, EnvScout loads it automatical
 ```json
 {
   "envExample": ".env.example",
+  "baseline": ".envscout-baseline.json",
   "ignore": ["node_modules/", "dist/", "build/"]
 }
 ```

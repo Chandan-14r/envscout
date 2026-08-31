@@ -35,6 +35,11 @@ export const DEFAULT_PATTERNS = [
     new RegExp(`\\bos\\.getenv\\s*\\(\\s*['"](${IDENT})['"]`, "g"),
     ["py"]
   ),
+  makeNamedPattern("go_os_getenv", new RegExp(`\\bos\\.Getenv\\s*\\(\\s*['"](${IDENT})['"]\\s*\\)`, "g"), ["go"]),
+  makeNamedPattern("go_os_lookup_env", new RegExp(`\\bos\\.LookupEnv\\s*\\(\\s*['"](${IDENT})['"]\\s*\\)`, "g"), ["go"]),
+  makeNamedPattern("rust_env_var", new RegExp(`\\b(?:std::)?env::var\\s*\\(\\s*['"](${IDENT})['"]\\s*\\)`, "g"), ["rs"]),
+  makeNamedPattern("rust_env_var_os", new RegExp(`\\b(?:std::)?env::var_os\\s*\\(\\s*['"](${IDENT})['"]\\s*\\)`, "g"), ["rs"]),
+  makeNamedPattern("java_system_getenv", new RegExp(`\\bSystem\\.getenv\\s*\\(\\s*['"](${IDENT})['"]\\s*\\)`, "g"), ["java", "kt", "kts"]),
   makeNamedPattern(
     "yaml_dollar_brace",
     new RegExp(`\\$\\{\\s*(${IDENT})\\s*\\}`, "g"),
@@ -55,6 +60,11 @@ export const DEFAULT_EXTENSIONS = new Set([
   "mjs",
   "cjs",
   "py",
+  "go",
+  "rs",
+  "java",
+  "kt",
+  "kts",
   "yml",
   "yaml",
   "sh",
@@ -77,4 +87,3 @@ export function shouldScanFile(relPathPosix) {
   const ext = base.includes(".") ? base.split(".").at(-1) : "";
   return DEFAULT_EXTENSIONS.has(ext);
 }
-

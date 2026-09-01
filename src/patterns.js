@@ -41,6 +41,11 @@ export const DEFAULT_PATTERNS = [
   makeNamedPattern("rust_env_var_os", new RegExp(`\\b(?:std::)?env::var_os\\s*\\(\\s*['"](${IDENT})['"]\\s*\\)`, "g"), ["rs"]),
   makeNamedPattern("java_system_getenv", new RegExp(`\\bSystem\\.getenv\\s*\\(\\s*['"](${IDENT})['"]\\s*\\)`, "g"), ["java", "kt", "kts"]),
   makeNamedPattern(
+    "dockerfile_env_or_arg",
+    new RegExp(`^\\s*(?:ENV|ARG)\\s+(${IDENT})(?:\\s*=|\\s|$)`, "gm"),
+    ["dockerfile"]
+  ),
+  makeNamedPattern(
     "yaml_dollar_brace",
     new RegExp(`\\$\\{\\s*(${IDENT})\\s*\\}`, "g"),
     ["yml", "yaml"]

@@ -12,7 +12,7 @@ It’s intentionally dependency-free and fast: a small, credible CLI you can ski
 
 ## Highlights
 
-- finds env usage across JS/TS, Python, Go, Rust, Java/Kotlin, YAML, and shell-style `${VARS}`
+- finds env usage across JS/TS, Python, Go, Rust, Java/Kotlin, Dockerfiles, YAML, and shell-style `${VARS}`
 - reports **missing keys** (referenced in code but absent from `.env.example`)
 - reports **unused keys** (present in `.env.example` but not referenced)
 - optional `--autofix` appends missing keys to `.env.example` safely

@@ -48,3 +48,33 @@ test("scanRepo finds env usage in Go, Rust, and JVM sources", async () => {
     await fs.rm(tempRoot, { recursive: true, force: true });
   }
 });
+
+test("scanRepo finds declared Dockerfile build and runtime configuration", async () => {
+  const tempRoot = await fs.mkdtemp(path.join(os.tmpdir(), "envscout-docker-"));
+  try {
+    await fs.writeFile(
+      path.join(tempRoot, "Dockerfile"),
+      [
+        "FROM node:20-alpine",
+        "ARG BUILD_SHA",
+        "ENV APP_PORT=3000",
+        "ENV LOG_LEVEL info",
+        "RUN echo $APP_PORT"
+      ].join("\n"),
+      "utf8"
+    );
+    await fs.writeFile(path.join(tempRoot, ".env.example"), "APP_PORT=\n", "utf8");
+
+    const report = await scanRepo(tempRoot, { envExamplePath: path.join(tempRoot, ".env.example") });
+
+    assert.deepEqual(report.keys, ["APP_PORT", "BUILD_SHA", "LOG_LEVEL"]);
+    assert.deepEqual(report.missingInEnvExample, ["BUILD_SHA", "LOG_LEVEL"]);
+    assert.deepEqual(report.findings.map(({ key, pattern }) => [key, pattern]), [
+      ["BUILD_SHA", "dockerfile_env_or_arg"],
+      ["APP_PORT", "dockerfile_env_or_arg"],
+      ["LOG_LEVEL", "dockerfile_env_or_arg"]
+    ]);
+  } finally {
+    await fs.rm(tempRoot, { recursive: true, force: true });
+  }
+});
